@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: picas-fijas-api
+  namespace: picas-fijas
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: picas-fijas-api
+  template:
+    metadata:
+      labels:
+        app: picas-fijas-api
+    spec:
+      containers:
+        - name: api
+          image: reich03/picas-fijas-api:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: api-config
+          readinessProbe:
+            httpGet:
+              path: /salud
+              port: 3000
+            initialDelaySeconds: 8
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /salud
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: picas-fijas-api
+  namespace: picas-fijas
+spec:
+  selector:
+    app: picas-fijas-api
+  ports:
+    - port: 3000
+      targetPort: 3000

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: picas-fijas-web
+  namespace: picas-fijas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: picas-fijas-web
+  template:
+    metadata:
+      labels:
+        app: picas-fijas-web
+    spec:
+      containers:
+        - name: web
+          image: reich03/picas-fijas-web:1.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: picas-fijas-web
+  namespace: picas-fijas
+spec:
+  selector:
+    app: picas-fijas-web
+  ports:
+    - port: 80
+      targetPort: 80
