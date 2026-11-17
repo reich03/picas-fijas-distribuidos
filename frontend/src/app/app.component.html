@@ -1,0 +1,139 @@
+@if (!sesion) {
+  <section class="login">
+    <h1>Picas y Fijas</h1>
+    <p>Entra con tu nombre. Ese nombre es tu jugador en la partida.</p>
+    <input pInputText [(ngModel)]="nombre" placeholder="Nombre" (keyup.enter)="entrar()" />
+    <p-button label="Entrar" (onClick)="entrar()" />
+    @if (error) {
+      <p class="error">{{ error }}</p>
+    }
+  </section>
+} @else {
+  <header class="barra">
+    <div>
+      <strong>Picas y Fijas</strong>
+      <span class="meta">{{ sesion }}</span>
+    </div>
+    <div class="meta">
+      <span>pod {{ api.pod }}</span>
+      <p-button label="Salir" [text]="true" (onClick)="salir()" />
+    </div>
+  </header>
+
+  <main class="panel">
+    <section class="caja">
+      <div class="fila">
+        <h2>Juegos</h2>
+        <p-button label="Crear juego" (onClick)="dialogo = true; secreto = ''; error = ''" />
+      </div>
+      <p-table
+        [value]="juegos"
+        selectionMode="single"
+        [(selection)]="seleccion"
+        dataKey="id"
+        [tableStyle]="{ 'min-width': '100%' }"
+      >
+        <ng-template #header>
+          <tr>
+            <th>Id</th>
+            <th>Estado</th>
+            <th>Creador</th>
+            <th>Ganador</th>
+          </tr>
+        </ng-template>
+        <ng-template #body let-juego>
+          <tr [pSelectableRow]="juego">
+            <td>{{ juego.id }}</td>
+            <td><p-tag [value]="etiqueta(juego.estado)" [severity]="severidad(juego.estado)" /></td>
+            <td>{{ juego.creador }}</td>
+            <td>{{ juego.ganador || '-' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template #emptymessage>
+          <tr>
+            <td colspan="4">No hay juegos.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </section>
+
+    <section class="caja">
+      @if (!seleccion) {
+        <h2>Partida</h2>
+        <p>Elige un juego de la lista o crea uno nuevo.</p>
+      } @else {
+        <h2>Partida {{ seleccion.id }}</h2>
+        <p>{{ seleccion.jugadores.join(' vs ') }}</p>
+        <p>
+          <p-tag [value]="etiqueta(seleccion.estado)" [severity]="severidad(seleccion.estado)" />
+          @if (seleccion.estado === 'en_juego') {
+            <span class="meta">turno de {{ seleccion.turno }}</span>
+          }
+          @if (seleccion.ganador) {
+            <span class="meta">gano {{ seleccion.ganador }}</span>
+          }
+        </p>
+
+        @if (seleccion.estado === 'por_iniciar' && seleccion.creador === sesion) {
+          <p>Esperando a que alguien se una.</p>
+        }
+
+        @if (puedoUnirme()) {
+          <div class="fila">
+            <input pInputText [(ngModel)]="secreto" maxlength="4" placeholder="Tu numero secreto" />
+            <p-button label="Unirme" (onClick)="unirse()" />
+          </div>
+        }
+
+        @if (seleccion.intentos.length) {
+          <table class="intentos">
+            <thead>
+              <tr>
+                <th>Jugador</th>
+                <th>Intento</th>
+                <th>Picas</th>
+                <th>Fijas</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of seleccion.intentos; track $index) {
+                <tr>
+                  <td>{{ item.jugador }}</td>
+                  <td>{{ item.numero }}</td>
+                  <td>{{ item.picas }}</td>
+                  <td>{{ item.fijas }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @if (esMiTurno()) {
+          <div class="fila">
+            <input pInputText [(ngModel)]="intento" maxlength="4" placeholder="Intento" (keyup.enter)="jugar()" />
+            <p-button label="Probar" (onClick)="jugar()" />
+          </div>
+        } @else if (seleccion.estado === 'en_juego') {
+          <p>Espera tu turno.</p>
+        }
+
+        @if (ultimo) {
+          <p class="resultado">{{ ultimo.fijas }} fijas, {{ ultimo.picas }} picas</p>
+        }
+      }
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+    </section>
+  </main>
+}
+
+<p-dialog header="Nuevo juego" [(visible)]="dialogo" [modal]="true" [style]="{ width: '24rem' }">
+  <div class="columna">
+    <input pInputText [(ngModel)]="secreto" maxlength="4" placeholder="Numero secreto de 4 digitos" />
+    <p-button label="Crear" (onClick)="crear()" />
+    @if (error) {
+      <p class="error">{{ error }}</p>
+    }
+  </div>
+</p-dialog>
