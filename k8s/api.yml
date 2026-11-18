@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: reich03/picas-fijas-api:1.0
+          image: reich0319/picas-fijas-api:1.0
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
