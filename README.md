@@ -98,11 +98,11 @@ Ahi la pagina queda en http://localhost:8080.
 En Killercoda el cluster no ve las imagenes que arme en mi pc. Las subo a Docker Hub y el repositorio tiene que quedar publico, si no el pod no las puede bajar.
 
 ```bash
-docker build -t reich03/picas-fijas-api:1.0 ./backend
-docker build -t reich03/picas-fijas-web:1.0 ./frontend
+docker build -t reich0319/picas-fijas-api:1.0 ./backend
+docker build -t reich0319/picas-fijas-web:1.0 ./frontend
 docker login
-docker push reich03/picas-fijas-api:1.0
-docker push reich03/picas-fijas-web:1.0
+docker push reich0319/picas-fijas-api:1.0
+docker push reich0319/picas-fijas-web:1.0
 ```
 
 Si el usuario de Docker Hub no es `reich03`, lo cambio en esos comandos y tambien en `k8s/api.yml` y `k8s/web.yml`.
